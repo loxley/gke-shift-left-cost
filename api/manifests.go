@@ -162,6 +162,11 @@ func (m *Manifests) loadObject(data []byte, conf CostimatorConfig) error {
 	}
 
 	obj, groupVersionKind, err := decode(data)
+	noAutoscalingV2 := `no kind "HorizontalPodAutoscaler" is registered for version "autoscaling/v2"`
+	if strings.Contains(fmt.Sprint(err), noAutoscalingV2) {
+		log.Debug("Skipping unsupported HPA version 'autoscaling/v2' (not implemented yet)")
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("Error Decoding. Check if your GroupVersionKind is defined in api/k8s_decoder.go. Root cause %+v", err)
 	}
